@@ -1,13 +1,14 @@
-from django.shortcuts import render, redirect, reverse, reverse, get_object_or_404
+from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib import messages
 from django.conf import settings
 
 from .forms import OrderForm
-from .models import  Order, OrderLineItem
+from .models import Order, OrderLineItem
 from products.models import Product
 from bag.contexts import bag_contents
 
 import stripe
+
 
 def checkout(request):
     stripe_public_key = settings.STRIPE_PUBLIC_KEY
@@ -62,7 +63,7 @@ def checkout(request):
         else:
             messages.error(request, 'There was an error with your form. \
                 Please double check your information.')
-    else: 
+    else:
         bag = request.session.get('bag', {})
         if not bag:
             messages.error(request, "There's nothing in your bag at the moment")
@@ -76,7 +77,6 @@ def checkout(request):
             amount=stripe_total,
             currency=settings.STRIPE_CURRENCY,
         )
-
 
         order_form = OrderForm()
 
@@ -94,22 +94,22 @@ def checkout(request):
     return render(request, template, context)
 
 
-    def checkout_success(request, order_number):
-        """
-        Handle successful checkouts
-        """
-        save_info = request.session.get('save_info')
-        order = get_object_or_404(Order, order_number=order_number)
-        messages.success(request, f'Order successfully processed! \
-            Your order number is {order_number}. A confirmation \
-                email will be sent to {order.email}.')
+def checkout_success(request, order_number):
+    """
+    Handle successful checkouts
+    """
+    save_info = request.session.get('save_info')
+    order = get_object_or_404(Order, order_number=order_number)
+    messages.success(request, f'Order successfully processed! \
+        Your order number is {order_number}. A confirmation \
+        email will be sent to {order.email}.')
 
-        if 'bag' in request.session:
-            del request.session['bag']
+    if 'bag' in request.session:
+        del request.session['bag']
 
-        template = 'checkout/checkout_success.html'
-        context = {
-            'order': order,
-        }
+    template = 'checkout/checkout_success.html'
+    context = {
+        'order': order,
+    }
 
-        return render(request, template, context)
+    return render(request, template, context)
