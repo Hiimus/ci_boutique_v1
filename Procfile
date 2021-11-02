@@ -1,1 +1,1 @@
-web: gunicorn ci_boutique.wsgi:application
+web: gunicorn ci_boutique_v1.wsgi:application
